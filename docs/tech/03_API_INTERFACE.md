@@ -17,7 +17,8 @@ API接口设计旨在实现：
 | **世界接口** | 世界状态管理 | /api/v1/world |
 | **战斗接口** | 战斗系统 | /api/v1/combat |
 | **交易接口** | 经济交易 | /api/v1/trade |
-| **任务接口** | 任务系统 | /api/v1/task |
+| **轮回接口** | 选胎、灵魂档案 | /api/v1/reincarnation |
+| **生命接口** | 单命校验、活跃生命 | /api/v1/life |
 | **AI接口** | AI NPC行为 | /api/v1/ai |
 
 ---
@@ -284,14 +285,16 @@ API接口设计旨在实现：
 
 ---
 
-## 七、任务接口
+## 七、生命与轮回接口
 
-### 7.1 获取任务列表
+> **已废除任务接口**（`/api/v1/task/*`）。人生由事件驱动，无任务清单 API。
+
+### 7.1 获取活跃生命
 
 | 属性 | 说明 |
 |------|------|
-| **路径** | GET /api/v1/task/list |
-| **描述** | 获取任务列表 |
+| **路径** | GET /api/v1/life/active |
+| **描述** | 获取当前唯一活跃生命（单命制） |
 | **认证** | JWT |
 
 **响应体：**
@@ -300,17 +303,19 @@ API接口设计旨在实现：
   "code": 200,
   "message": "success",
   "data": {
-    "tasks": []
+    "active_life_id": "uuid",
+    "entity_id": "uuid",
+    "status": "alive"
   }
 }
 ```
 
-### 7.2 接受任务
+### 7.2 获取投胎池
 
 | 属性 | 说明 |
 |------|------|
-| **路径** | POST /api/v1/task/:id/accept |
-| **描述** | 接受任务 |
+| **路径** | GET /api/v1/reincarnation/pool |
+| **描述** | 死亡后获取功德允许的投胎可选项 |
 | **认证** | JWT |
 
 **响应体：**
@@ -319,11 +324,37 @@ API接口设计旨在实现：
   "code": 200,
   "message": "success",
   "data": {
-    "task_id": "uuid",
-    "status": "accepted"
+    "pool": [
+      { "realm": "human", "species_tier": "common", "identity_tier": "civilian", "locked": false }
+    ],
+    "merit_after_penalty": 1200,
+    "judgment_tier": "normal"
   }
 }
 ```
+
+### 7.3 选择投胎
+
+| 属性 | 说明 |
+|------|------|
+| **路径** | POST /api/v1/reincarnation/choose |
+| **描述** | 在池内选定下一世；服务端校验单命制与池内合法性 |
+| **认证** | JWT |
+
+**请求体：**
+```json
+{
+  "pool_option_id": "uuid"
+}
+```
+
+### 7.4 轮回档案（只读）
+
+| 属性 | 说明 |
+|------|------|
+| **路径** | GET /api/v1/reincarnation/archive |
+| **描述** | 只读多世历史，不可并行操控 |
+| **认证** | JWT |
 
 ---
 
@@ -388,6 +419,7 @@ API接口设计旨在实现：
 
 ---
 
-**文档版本**: v1.0  
+**文档版本**: v1.1  
 **创建日期**: 2026-06-12  
+**更新日期**: 2026-06-12（废除任务 API，新增生命/轮回接口）  
 **适用范围**: 游戏开发团队、程序员、前端开发

@@ -27,12 +27,12 @@
 
 | 字段名 | 类型 | 约束 | 说明 |
 |--------|------|------|------|
-| id | UUID | PRIMARY KEY | 玩家唯一标识 |
+| id | UUID | PRIMARY KEY | 玩家（灵魂）唯一标识 |
 | name | VARCHAR(64) | NOT NULL | 玩家名称 |
 | avatar | VARCHAR(256) | | 头像URL |
-| level | INT | NOT NULL DEFAULT 1 | 等级 |
-| exp | BIGINT | NOT NULL DEFAULT 0 | 经验值 |
-| karma | INT | NOT NULL DEFAULT 0 | 因果值 |
+| active_life_id | UUID | FOREIGN KEY, UNIQUE | 当前唯一活跃生命（单命制） |
+| merit | INT | NOT NULL DEFAULT 0 | 功德（跨世） |
+| sin_karma | JSONB | NOT NULL DEFAULT '{}' | 业力权重（当世路径参数） |
 | gold | BIGINT | NOT NULL DEFAULT 0 | 金币 |
 | created_at | TIMESTAMP | NOT NULL | 创建时间 |
 | updated_at | TIMESTAMP | NOT NULL | 更新时间 |
@@ -94,7 +94,33 @@
 | effect | JSONB | NOT NULL | 影响效果 |
 | created_at | TIMESTAMP | NOT NULL | 创建时间 |
 
-### 2.7 ReincarnationRecord表
+### 2.7 SoulArchive表（灵魂档案）
+
+| 字段名 | 类型 | 约束 | 说明 |
+|--------|------|------|------|
+| id | UUID | PRIMARY KEY | 档案 ID |
+| player_id | UUID | FOREIGN KEY | 灵魂/玩家 ID |
+| life_count | INT | NOT NULL | 轮回次数 |
+| imprints | JSONB | NOT NULL | 因果印记（100% 继承） |
+| merit_carry | INT | NOT NULL | 可继承功德基数 |
+| archive_entries | JSONB | NOT NULL | 只读多世摘要 |
+| created_at | TIMESTAMP | NOT NULL | 创建时间 |
+| updated_at | TIMESTAMP | NOT NULL | 更新时间 |
+
+### 2.8 ReincarnationPool表（投胎池快照）
+
+| 字段名 | 类型 | 约束 | 说明 |
+|--------|------|------|------|
+| id | UUID | PRIMARY KEY | 池快照 ID |
+| player_id | UUID | FOREIGN KEY | 玩家 ID |
+| judgment_value | INT | NOT NULL | 判定值（仅扩缩池） |
+| merit_at_death | INT | NOT NULL | 死亡时功德 |
+| options | JSONB | NOT NULL | 可选投胎项列表 |
+| chosen_option_id | UUID | | 玩家选定项 |
+| expires_at | TIMESTAMP | NOT NULL | 选胎超时 |
+| created_at | TIMESTAMP | NOT NULL | 创建时间 |
+
+### 2.9 ReincarnationRecord表
 
 | 字段名 | 类型 | 约束 | 说明 |
 |--------|------|------|------|
@@ -228,6 +254,7 @@ Entity 1 ─── * ReincarnationRecord (new)
 
 ---
 
-**文档版本**: v1.0  
+**文档版本**: v1.1  
 **创建日期**: 2026-06-12  
+**更新日期**: 2026-06-12（active_life_id、灵魂档案、投胎池）  
 **适用范围**: 游戏开发团队、程序员、DBA
